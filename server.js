@@ -45,6 +45,37 @@ app.get('/customers/:id', (req, res) => {
         });
     });
 });
+// ✅ Get all orders for a specific customer
+app.get('/customers/:id/orders', (req, res) => {
+    const customerId = req.params.id;
+
+    // Check if the customer exists first
+    db.query('SELECT * FROM users WHERE id = ?', [customerId], (err, userResult) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (userResult.length === 0) return res.status(404).json({ error: 'Customer not found' });
+
+        // Fetch orders for that customer
+        db.query('SELECT * FROM orders WHERE user_id = ?', [customerId], (err, orderResult) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({
+                customer_id: customerId,
+                orders: orderResult
+            });
+        });
+    });
+});
+// ✅ Get details for a specific order
+app.get('/orders/:orderId', (req, res) => {
+    const orderId = req.params.orderId;
+
+    db.query('SELECT * FROM orders WHERE order_id = ?', [orderId], (err, orderResult) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (orderResult.length === 0) return res.status(404).json({ error: 'Order not found' });
+
+        res.json(orderResult[0]);
+    });
+});
+
 
 // ✅ Start server
 const PORT = 3000;
